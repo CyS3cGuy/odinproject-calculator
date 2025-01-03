@@ -5,6 +5,14 @@
     border: 1px solid black;
 }
 
+/* Change this later */
+#storage-display {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    width: 100%;
+    height: 100px;
+}
+
 /* Utility Class */
 .flex-center {
     display: flex;
@@ -102,13 +110,15 @@ button {
     color: rgb(238, 234, 234);
 }
 
-.actual-digit {
+.digit {
     color: black;
 }
 
-.actual-digit.sign {
+/* To be enabled when body is flex-centered */
+
+/* .actual-digit.sign {
     right: 4px;
-}
+} */
 
 /* Calculator pad container CSS */
 
