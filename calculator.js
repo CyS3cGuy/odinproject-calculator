@@ -58,22 +58,26 @@ const calculator = {
         return null;
     },
 
-    
+
     transformNum: function (unvalidatedNum) {
         if (this.isError) {
             return null;
         }
 
-        // We look for number greater than 9999999999 (ten 9s)
+        // The below 3 use cases need to be exponent
+        // 1. Number greater than 9999999999 (ten 9s)
         let isLargeNumExceededDisplayBound = unvalidatedNum > (10 ** MAX_SCREEN_DIGITS - 1);
 
-        // ... and also number that is 0 < x < 10^-8
+        // 2. ... and also number that is 0 < x < 10^-8
         let isEpsilonExceedDisplayBound = unvalidatedNum < (10 ** -(MAX_SCREEN_DIGITS - 2)) && unvalidatedNum > 0;
 
-        // ... and also number that has very long decimal place but is greater than 10^-8 but less than 1 (10^-8 <= x < 1)
-        let isDecimalExceedDisplayBound = unvalidatedNum >= (10 ** -(MAX_SCREEN_DIGITS - 2)) && unvalidatedNum < 1 && getNumString(unvalidatedNum).length > MAX_SCREEN_DIGITS; 
+        // 3. ... and also number that has very long decimal place but is greater than 10^-8 but less than 1 (10^-8 <= x < 1)
+        let isEpsilonDecimalExceedDisplayBound = unvalidatedNum >= (10 ** -(MAX_SCREEN_DIGITS - 2)) && unvalidatedNum < 1 && getNumString(unvalidatedNum).length > MAX_SCREEN_DIGITS;
 
-        return isLargeNumExceededDisplayBound || isEpsilonExceedDisplayBound || isDecimalExceedDisplayBound ? transformNumExponential(this, unvalidatedNum) : getNumString(unvalidatedNum);
+        // 4th case is that the number that is not very large but has very long decimal places. we do not want exponent but we need to truncate
+        let isDecimalExceedDisplayBound = getNumString(unvalidatedNum).length > MAX_SCREEN_DIGITS;
+
+        return isLargeNumExceededDisplayBound || isEpsilonExceedDisplayBound || isEpsilonDecimalExceedDisplayBound ? transformNumExponential(this, unvalidatedNum) : truncateNum(unvalidatedNum);
     },
 
     validateError: function (transformedNumStr) {
@@ -97,6 +101,7 @@ dom_addNumPadButtonEventListener(calculator, calcPad, calcScreen, storageDisplay
 dom_addOperatorButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
 dom_addEqualButtonEventListener(calculator, calcScreen, storageDisplay);
 dom_addAllClearButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
+dom_addUndoButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
 
 // Logic function
 
@@ -135,6 +140,17 @@ function appendNum(num, appendingNumChar) {
     return +numStr;
 }
 
+// Function to remove 1 number upon undo
+function undoNum(num) {
+    if (num === null) {
+        return "";
+    }
+
+    let numStr = getNumString(num);
+    return +numStr.slice(0, numStr.length - 1);;
+}
+
+
 // Function to transform number into its exponential string format
 function transformNumExponential(calculator, num) {
     // Only allow up until the maximum safe integer
@@ -160,6 +176,11 @@ function transformNumExponential(calculator, num) {
 
     return isLargeNum ? correctedBase + "E" + correctedExponent : correctedBase + "E-" + correctedExponent;
 
+}
+
+function truncateNum(num) {
+    let numStr = getNumString(num);
+    return numStr.length > MAX_SCREEN_DIGITS? numStr.slice(0, MAX_SCREEN_DIGITS) : numStr;
 }
 
 // DOM display update function
@@ -289,6 +310,31 @@ function dom_addEqualButtonEventListener(calculator, calcScreen, storageDisplay)
         }
     })
 }
+
+function dom_addUndoButtonEventListener(calculator, calcPad, calcScreen, storageDisplay) {
+    calcPad.querySelector("#undo").addEventListener("click", () => {
+        if (!calculator.isError) {
+            let isNum1Empty = calculator.num1 === null;
+            let isNum2Empty = calculator.num2 === null;
+            let isOperatorEmpty = calculator.operator === "";
+
+
+            if (isOperatorEmpty) {
+                if (!isNum1Empty) {
+                    calculator.num1 = undoNum(calculator.num1);
+                }
+            } else {
+                if (!isNum2Empty) {
+                    calculator.num2 = undoNum(calculator.num2);
+                }
+            }
+
+            dom_updateStorageDisplay(calculator, storageDisplay);
+            dom_updateCalcScreen(calculator, calcScreen);
+        }
+    });
+}
+
 
 function dom_addAllClearButtonEventListener(calculator, calcPad, calcScreen, storageDisplay) {
     calcPad.querySelector("#all-clear").addEventListener("click", () => {
