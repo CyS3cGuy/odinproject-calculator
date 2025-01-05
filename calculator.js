@@ -87,18 +87,19 @@ const calculator = {
 };
 
 /** DOM variable ***/
-const storageDisplay = document.querySelector("#storage-display");
+const debugDisplay = document.querySelector("#debug-display");
 const calcScreen = document.querySelector("#calc-screen");
 const calcPad = document.querySelector("#calc-pad");
 
 dom_clearCalcScreen(calcScreen);
-dom_addNumPadButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
-dom_addOperatorButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
-dom_addEqualButtonEventListener(calculator, calcScreen, storageDisplay);
-dom_addAllClearButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
-dom_addUndoButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
-dom_addSignChangeButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
-dom_addDotButtonEventListener(calculator, calcPad, calcScreen, storageDisplay)
+dom_addNumPadButtonEventListener(calculator, calcPad, calcScreen, debugDisplay);
+dom_addOperatorButtonEventListener(calculator, calcPad, calcScreen, debugDisplay);
+dom_addEqualButtonEventListener(calculator, calcScreen, debugDisplay);
+dom_addAllClearButtonEventListener(calculator, calcPad, calcScreen, debugDisplay);
+dom_addUndoButtonEventListener(calculator, calcPad, calcScreen, debugDisplay);
+dom_addSignChangeButtonEventListener(calculator, calcPad, calcScreen, debugDisplay);
+dom_addDotButtonEventListener(calculator, calcPad, calcScreen, debugDisplay);
+dom_addKeyBoardSupport(calcPad, debugDisplay);
 
 /*** Logic function ***/
 
@@ -258,6 +259,7 @@ function dom_updateStorageDisplay(calculator, storageDisplay) {
 
     storageDisplay.querySelector(".num1-buffer").textContent = calculator.numBuffer[0];
     storageDisplay.querySelector(".num2-buffer").textContent = calculator.numBuffer[1];
+
 }
 
 /*** DOM event listener ***/
@@ -446,4 +448,50 @@ function dom_addAllClearButtonEventListener(calculator, calcPad, calcScreen, sto
         dom_clearCalcScreen(calcScreen);
         dom_updateStorageDisplay(calculator, storageDisplay);
     });
+}
+
+function dom_addKeyBoardSupport(calcPad, storageDisplay) {
+    let clickEvent = new MouseEvent("click");
+    document.addEventListener('keydown', e => {
+        let keyPressed = e.key;
+        storageDisplay.querySelector(".keydown").textContent = keyPressed;
+
+        if (keyPressed >= "0" && keyPressed <= "9") {
+            const numPadArray = Array.from(calcPad.querySelectorAll(".num")).sort((lastNumPad, nextNumPad) => {
+                let lastNum = +lastNumPad.getAttribute("id");
+                let nextNum = +nextNumPad.getAttribute("id");
+
+                return lastNum < nextNum ? -1 : 1;
+            });
+
+            numPadArray[+keyPressed].dispatchEvent(clickEvent);
+        } 
+        else if (keyPressed === "+") {
+            calcPad.querySelector("#plus").dispatchEvent(clickEvent);
+        }
+        else if (keyPressed === "-") {
+            calcPad.querySelector("#minus").dispatchEvent(clickEvent);
+        }
+        else if (keyPressed === "*") {
+            calcPad.querySelector("#multiply").dispatchEvent(clickEvent);
+        }
+        else if (keyPressed === "/") {
+            calcPad.querySelector("#divide").dispatchEvent(clickEvent);
+        }
+        else if (keyPressed === "Enter") {
+            calcPad.querySelector("#equal").dispatchEvent(clickEvent);
+        }
+        else if (keyPressed === "Escape") {
+            calcPad.querySelector("#all-clear").dispatchEvent(clickEvent);
+        }
+        else if (keyPressed === "Backspace") {
+            calcPad.querySelector("#undo").dispatchEvent(clickEvent);
+        }
+        else if (keyPressed === "s") {
+            calcPad.querySelector("#sign-change").dispatchEvent(clickEvent);
+        }
+        else if (keyPressed === ".") {
+            calcPad.querySelector("#dot").dispatchEvent(clickEvent);
+        }
+    })
 }
