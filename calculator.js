@@ -2,19 +2,26 @@ const MAX_SCREEN_DIGITS = 10;
 const DEFAULT_SLICE = MAX_SCREEN_DIGITS - 3;
 const DEFAULT_SLICE_LESS = MAX_SCREEN_DIGITS - 4;
 
-// Calculator object
+/*** Calculator object ***/
 const calculator = {
-    num1: null,
-    num2: null,
+    num: [null, null],
     operator: "",
+    numBuffer: ["", ""],
+    pointer: 0,
     isError: false,
     errorType: "",
 
     init: function () {
-        this.num1 = null;
-        this.num2 = null;
+        this.num = [null, null];
         this.operator = "";
+        this.numBuffer = ["", ""];
+        this.pointer = 0;
         this.isError = false;
+    },
+
+    initNum: function (pos) {
+        this.num[pos] = null;
+        this.numBuffer[pos] = "";
     },
 
     operate: function (a, b, op) {
@@ -31,38 +38,29 @@ const calculator = {
 
     multiply: (a, b) => a * b,
 
-    divide: (a, b) => {
+    divide: function (a, b) {
         if (b === 0) {
             this.isError = true;
-            console.log("DIV ERROR");
-            return "ERROR";
+            this.errorType = "DIV ERROR";
+            return null;
         }
         else {
             return a / b;
         }
     },
 
-    returnDisplayNum: function () {
-        let isNum1Empty = this.num1 === null;
-        let isNum2Empty = this.num2 === null;
+    returnDisplayNumPosition: function () {
 
-        // Check for num 2 first, before num 1, because num 2 may be available.
-        if (!isNum2Empty) {
-            return this.num2;
-        } else if (!isNum1Empty) {
-            return this.num1;
-        }
-
-        this.isError = true;
-        this.errorType = "DISP ERROR";
-        return null;
+        return this.pointer;
     },
 
 
-    transformNum: function (unvalidatedNum) {
+    transformNum: function (pos) {
         if (this.isError) {
             return null;
         }
+
+        let unvalidatedNum = Math.abs(this.num[pos]);
 
         // The below 3 use cases need to be exponent
         // 1. Number greater than 9999999999 (ten 9s)
@@ -74,10 +72,7 @@ const calculator = {
         // 3. ... and also number that has very long decimal place but is greater than 10^-8 but less than 1 (10^-8 <= x < 1)
         let isEpsilonDecimalExceedDisplayBound = unvalidatedNum >= (10 ** -(MAX_SCREEN_DIGITS - 2)) && unvalidatedNum < 1 && getNumString(unvalidatedNum).length > MAX_SCREEN_DIGITS;
 
-        // 4th case is that the number that is not very large but has very long decimal places. we do not want exponent but we need to truncate
-        let isDecimalExceedDisplayBound = getNumString(unvalidatedNum).length > MAX_SCREEN_DIGITS;
-
-        return isLargeNumExceededDisplayBound || isEpsilonExceedDisplayBound || isEpsilonDecimalExceedDisplayBound ? transformNumExponential(this, unvalidatedNum) : truncateNum(unvalidatedNum);
+        return isLargeNumExceededDisplayBound || isEpsilonExceedDisplayBound || isEpsilonDecimalExceedDisplayBound ? transformNumExponential(this, pos) : truncateNum(this, pos);
     },
 
     validateError: function (transformedNumStr) {
@@ -91,7 +86,7 @@ const calculator = {
 
 };
 
-// DOM
+/** DOM variable ***/
 const storageDisplay = document.querySelector("#storage-display");
 const calcScreen = document.querySelector("#calc-screen");
 const calcPad = document.querySelector("#calc-pad");
@@ -102,8 +97,10 @@ dom_addOperatorButtonEventListener(calculator, calcPad, calcScreen, storageDispl
 dom_addEqualButtonEventListener(calculator, calcScreen, storageDisplay);
 dom_addAllClearButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
 dom_addUndoButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
+dom_addSignChangeButtonEventListener(calculator, calcPad, calcScreen, storageDisplay);
+dom_addDotButtonEventListener(calculator, calcPad, calcScreen, storageDisplay)
 
-// Logic function
+/*** Logic function ***/
 
 // Function to slice the base of an exponential and remove zero and/or dot (where necessary)
 function getNonPoweredNumAndRemoveTrailingZeroDot(baseStr, sliceNum) {
@@ -131,28 +128,29 @@ function getNumString(num) {
 }
 
 // Function to append number based on numpad clicked
-function appendNum(num, appendingNumChar) {
-    let numStr = getNumString(num);
-    if (appendingNumChar >= "0" && appendingNumChar <= "9" || appendingNumChar === ".") {
+function appendNum(buffer, appendingNumChar) {
+    let numStr = buffer;
+    if (appendingNumChar >= "0" && appendingNumChar <= "9") {
         numStr += appendingNumChar;
     }
 
-    return +numStr;
+    return numStr;
 }
 
 // Function to remove 1 number upon undo
-function undoNum(num) {
-    if (num === null) {
+function undoNum(buffer) {
+    if (buffer === "") {
         return "";
     }
 
-    let numStr = getNumString(num);
-    return +numStr.slice(0, numStr.length - 1);;
+    let sliced = buffer.slice(0, buffer.length - 1);
+
+    return sliced === "" || sliced === "0" ? "" : sliced;
 }
 
-
 // Function to transform number into its exponential string format
-function transformNumExponential(calculator, num) {
+function transformNumExponential(calculator, pos) {
+    let num = Math.abs(calculator.num[pos]);
     // Only allow up until the maximum safe integer
     if (num > Number.MAX_SAFE_INTEGER) {
         calculator.isError = true;
@@ -178,12 +176,40 @@ function transformNumExponential(calculator, num) {
 
 }
 
-function truncateNum(num) {
-    let numStr = getNumString(num);
-    return numStr.length > MAX_SCREEN_DIGITS? numStr.slice(0, MAX_SCREEN_DIGITS) : numStr;
+function truncateNum(calculator, pos) {
+
+    let num = Math.abs(calculator.num[pos]);
+
+    // Because buffer may not be the same as actual number value (for example, the case where the buffer in num1 is not updated when using the previous result as an operand), we need to check if they are the same when converted to number type.
+
+    // If the converted values are the same, we prefer using the buffer string instead, because there is a possibility that the number type will truncate the "." and trailing "0" for a decimal, which is not what we desired as we want to display those on calculator screen. we want the original untruncated string
+
+    // If they are not the same, then use the actual number (not buffer string) as the actual number is the updated one. This can only happen if the previous result is used as num1.
+
+    let isNumValSameAsBuffer = num === +calculator.numBuffer[pos];
+
+    let numStr = isNumValSameAsBuffer ? calculator.numBuffer[pos] : getNumString(num);
+
+    return numStr.length > MAX_SCREEN_DIGITS ? getNonPoweredNumAndRemoveTrailingZeroDot(numStr, MAX_SCREEN_DIGITS) : numStr;
 }
 
-// DOM display update function
+function toggleSignChange(num) {
+    return -num;
+}
+
+function addDot(bufferStr, isStrEmpty) {
+    if (isStrEmpty) {
+        return bufferStr + "0.";
+    } else {
+        if (!bufferStr.includes(".")) {
+            return bufferStr + ".";
+        }
+    }
+
+    return bufferStr;
+}
+
+/*** DOM display update function ***/
 function dom_clearCalcScreen(calcScreen) {
     calcScreen.querySelectorAll(".digit").forEach((eachDigit, index, arr) => {
         eachDigit.textContent = index === arr.length - 1 ? "0" : "";
@@ -191,46 +217,59 @@ function dom_clearCalcScreen(calcScreen) {
 }
 
 function dom_updateCalcScreen(calculator, calcScreen) {
-    let isNum1Empty = calculator.num1 === null;
-    let isNum2Empty = calculator.num2 === null;
-
-    // Adding this validation to handle cases where user click an operator without first supplying num1
-    if (isNum1Empty && isNum2Empty) {
-        return;
-    }
+    let isNum1Empty = calculator.num[0] === null;
+    let isNum2Empty = calculator.num[1] === null;
+    let transformedNumStr = "0";
+    let validatedNumStr = "0";
+    let numPosition = 0;
 
     dom_clearCalcScreen(calcScreen);
 
-    let unvalidatedNum = calculator.returnDisplayNum();
-    let transformedNumStr = calculator.transformNum(unvalidatedNum);
-    let validatedNumStr = calculator.validateError(transformedNumStr);
+    // Adding this validation to handle cases where user click an operator without first supplying num1
 
-    const numArr = validatedNumStr.split("").reverse(); // Reversing the string so that least significant bit takes the index 0 position
+    if (!(isNum1Empty && isNum2Empty)) {
+        numPosition = calculator.returnDisplayNumPosition();
+
+        transformedNumStr = calculator.transformNum(numPosition); // We disregard the negative sign. it will be handled separately.
+    }
+
+    validatedNumStr = calculator.validateError(transformedNumStr);
+
+    // we first reverse the string so that least significant bit takes the index 0 position
+    // then we populate each num digit in array onto the calculator screen
+    const numArr = validatedNumStr.split("").reverse();
 
     const digitDisplayArr = Array.from(calcScreen.querySelectorAll(".actual"));
 
-    for (let i = 0; i < numArr.length; i++) {
-        const desiredDigit = digitDisplayArr.find(single => +single.getAttribute("index") === i); // let program know which div to update text content
-        desiredDigit.querySelector(".digit").textContent = numArr[i];
-    }
+    numArr.forEach((value, pos) => {
+        const desiredDigit = digitDisplayArr.find(single => +single.getAttribute("index") === pos); // let program know which div to update text content
+        desiredDigit.querySelector(".digit").textContent = value;
+    })
+
+    // if negative, put negative sign in front. positive no need
+    const signedDisplay = calcScreen.querySelector(".sign .digit");
+    signedDisplay.textContent = calculator.num[numPosition] >= 0 || calculator.num[numPosition] === null ? "" : "-";
 }
 
 function dom_updateStorageDisplay(calculator, storageDisplay) {
-    storageDisplay.querySelector(".num1").textContent = getNumString(calculator.num1);
-    storageDisplay.querySelector(".num2").textContent = getNumString(calculator.num2);
+    storageDisplay.querySelector(".num1").textContent = getNumString(calculator.num[0]);
+    storageDisplay.querySelector(".num2").textContent = getNumString(calculator.num[1]);
     storageDisplay.querySelector(".op").textContent = calculator.operator;
+
+    storageDisplay.querySelector(".num1-buffer").textContent = calculator.numBuffer[0];
+    storageDisplay.querySelector(".num2-buffer").textContent = calculator.numBuffer[1];
 }
 
-// DOM event listener
+/*** DOM event listener ***/
 function dom_addNumPadButtonEventListener(calculator, calcPad, calcScreen, storageDisplay) {
     calcPad.querySelectorAll(".num").forEach((eachNumButton) => {
         eachNumButton.addEventListener("click", e => {
             if (!calculator.isError) {
                 let isZero = e.target.getAttribute("id") === "0";
-                let isNum1Empty = calculator.num1 === null;
-                let isNum2Empty = calculator.num2 === null;
-                let num1LenExceeded = getNumString(calculator.num1).length === MAX_SCREEN_DIGITS;
-                let num2LenExceeded = getNumString(calculator.num2).length === MAX_SCREEN_DIGITS;
+                let isNum1Empty = calculator.num[0] === null;
+                let isNum2Empty = calculator.num[1] === null;
+                let num1LenExceeded = calculator.numBuffer[0].length >= MAX_SCREEN_DIGITS;
+                let num2LenExceeded = calculator.numBuffer[1].length >= MAX_SCREEN_DIGITS;
                 let numPadClicked = e.target.getAttribute("id");
 
 
@@ -240,14 +279,18 @@ function dom_addNumPadButtonEventListener(calculator, calcPad, calcScreen, stora
                     // But remember to check if the number is empty and yet "0" button is pressed, the "0" should not be accounted for.
                     if (!(isZero && isNum1Empty)) {
                         if (!num1LenExceeded) {
-                            calculator.num1 = appendNum(calculator.num1, numPadClicked);
+                            calculator.pointer = 0;
+                            calculator.numBuffer[0] = appendNum(calculator.numBuffer[0], numPadClicked);
+                            calculator.num[0] = +calculator.numBuffer[0];
                         }
                     }
                 }
                 else {
                     if (!(isZero && isNum2Empty)) {
                         if (!num2LenExceeded) {
-                            calculator.num2 = appendNum(calculator.num2, numPadClicked);
+                            calculator.pointer = 1;
+                            calculator.numBuffer[1] = appendNum(calculator.numBuffer[1], numPadClicked);
+                            calculator.num[1] = +calculator.numBuffer[1];
                         }
                     }
                 }
@@ -263,17 +306,18 @@ function dom_addOperatorButtonEventListener(calculator, calcPad, calcScreen, sto
     calcPad.querySelectorAll(".operator").forEach((eachOperatorButton) => {
         eachOperatorButton.addEventListener("click", e => {
             if (!calculator.isError) {
-                let isNum1Empty = calculator.num1 === null;
-                let isNum2Empty = calculator.num2 === null;
+                let isNum1Empty = calculator.num[0] === null;
+                let isNum2Empty = calculator.num[1] === null;
                 let operatorPadClicked = e.target.getAttribute("operator");
 
                 // We will compute the operation if num2 is available, before a new operator replace the existing
 
                 // And we need to replace the result into num1, and make num2 empty
                 if (!isNum2Empty) {
-                    calculator.num1 = calculator.operate(calculator.num1, calculator.num2, calculator.operator);
+                    calculator.pointer = 0;
+                    calculator.num[0] = calculator.operate(calculator.num[0], calculator.num[1], calculator.operator);
 
-                    calculator.num2 = null;
+                    calculator.initNum(1);
                 }
 
                 // We only consider an operator if num1 is not empty
@@ -291,21 +335,24 @@ function dom_addOperatorButtonEventListener(calculator, calcPad, calcScreen, sto
 function dom_addEqualButtonEventListener(calculator, calcScreen, storageDisplay) {
     calcPad.querySelector("#equal").addEventListener("click", e => {
         if (!calculator.isError) {
-            let isNum1Empty = calculator.num1 === null;
-            let isNum2Empty = calculator.num2 === null;
+            let isNum1Empty = calculator.num[0] === null;
+            let isNum2Empty = calculator.num[1] === null;
             let isOperatorEmpty = calculator.operator === "";
 
             // Make sure num1, num2 and operator is not an empty string before we compute "="
             if (!isNum1Empty && !isNum2Empty && !isOperatorEmpty) {
-                calculator.num1 = calculator.operate(calculator.num1, calculator.num2, calculator.operator);
+                calculator.pointer = 0;
+                calculator.num[0] = calculator.operate(calculator.num[0], calculator.num[1], calculator.operator);
+
+                calculator.numBuffer[0] = getNumString(calculator.num[0]);
 
                 // num2 and operator must be empty now so that the screen display shows num1, which is the computed result
-                calculator.num2 = null;
+                calculator.initNum(1);
                 calculator.operator = "";
 
                 dom_updateCalcScreen(calculator, calcScreen);
                 dom_updateStorageDisplay(calculator, storageDisplay);
-                calculator.init(); // once done display, num1 is emptied so that the result cannot be used for next operation. 
+                // calculator.init(); // once done display, num1 is emptied so that the result cannot be used for next operation. 
             }
         }
     })
@@ -314,18 +361,22 @@ function dom_addEqualButtonEventListener(calculator, calcScreen, storageDisplay)
 function dom_addUndoButtonEventListener(calculator, calcPad, calcScreen, storageDisplay) {
     calcPad.querySelector("#undo").addEventListener("click", () => {
         if (!calculator.isError) {
-            let isNum1Empty = calculator.num1 === null;
-            let isNum2Empty = calculator.num2 === null;
+            let isNum1Empty = calculator.num[0] === null;
+            let isNum2Empty = calculator.num[1] === null;
             let isOperatorEmpty = calculator.operator === "";
 
 
             if (isOperatorEmpty) {
-                if (!isNum1Empty) {
-                    calculator.num1 = undoNum(calculator.num1);
+                if (!isNum1Empty && !calculator.numBuffer[0].includes("e")) {
+                    calculator.numBuffer[0] = undoNum(calculator.numBuffer[0]);
+
+                    calculator.num[0] = calculator.numBuffer[0] === "" ? null : +calculator.numBuffer[0];
                 }
             } else {
-                if (!isNum2Empty) {
-                    calculator.num2 = undoNum(calculator.num2);
+                if (!isNum2Empty && !calculator.numBuffer[1].includes("e")) {
+                    calculator.numBuffer[1] = undoNum(calculator.numBuffer[1]);
+
+                    calculator.num[1] = calculator.numBuffer[1] === "" ? null : +calculator.numBuffer[1];
                 }
             }
 
@@ -335,6 +386,57 @@ function dom_addUndoButtonEventListener(calculator, calcPad, calcScreen, storage
     });
 }
 
+function dom_addSignChangeButtonEventListener(calculator, calcPad, calcScreen, storageDisplay) {
+    calcPad.querySelector("#sign-change").addEventListener("click", () => {
+        if (!calculator.isError) {
+            let isNum1Empty = calculator.num[0] === null;
+            let isNum2Empty = calculator.num[1] === null;
+            let isOperatorEmpty = calculator.operator === "";
+
+            if (isOperatorEmpty) {
+                if (!isNum1Empty) {
+                    calculator.num[0] = toggleSignChange(calculator.num[0]);
+
+                    calculator.numBuffer[0] = getNumString(calculator.num[0]);
+                }
+            } else {
+                if (!isNum2Empty) {
+                    calculator.num[1] = toggleSignChange(calculator.num[1]);
+
+                    calculator.numBuffer[1] = getNumString(calculator.num[1]);
+                }
+            }
+
+            dom_updateStorageDisplay(calculator, storageDisplay);
+            dom_updateCalcScreen(calculator, calcScreen);
+        }
+    })
+}
+
+function dom_addDotButtonEventListener(calculator, calcPad, calcScreen, storageDisplay) {
+    calcPad.querySelector("#dot").addEventListener("click", () => {
+        if (!calculator.isError) {
+            let isNum1Empty = calculator.num[0] === null;
+            let isNum2Empty = calculator.num[1] === null;
+            let isOperatorEmpty = calculator.operator === "";
+
+            if (isOperatorEmpty) {
+                calculator.pointer = 0;
+                calculator.numBuffer[0] = addDot(calculator.numBuffer[0], isNum1Empty);
+
+                calculator.num[0] = +calculator.numBuffer[0];
+            } else {
+                calculator.pointer = 1;
+                calculator.numBuffer[1] = addDot(calculator.numBuffer[1], isNum2Empty);
+
+                calculator.num[1] = +calculator.numBuffer[1];
+            }
+
+            dom_updateStorageDisplay(calculator, storageDisplay);
+            dom_updateCalcScreen(calculator, calcScreen);
+        }
+    })
+}
 
 function dom_addAllClearButtonEventListener(calculator, calcPad, calcScreen, storageDisplay) {
     calcPad.querySelector("#all-clear").addEventListener("click", () => {
