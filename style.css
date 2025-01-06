@@ -70,6 +70,10 @@
     color: rgb(233, 231, 231);
 }
 
+.bg-red {
+    background-color: rgb(189, 15, 15) !important;
+}
+
 /* Generic element CSS */
 
 body {
