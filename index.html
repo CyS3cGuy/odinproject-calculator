@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <script src="calculator.js" defer></script>
-    <title>KalCueLayTar</title>
+    <title>Call-U-Later</title>
 </head>
 
-<body class="">
+<body class="flex-column">
     <div id="debug-display">
         <div>Num 1: <span class="num1"></span></div>
         <div>Operator: <span class="op"></span></div>
@@ -19,122 +19,184 @@
         <div>KeyDown: <span class="keydown"></span></div>
     </div>
 
-    <div id="calculator" class="border-box debug-border">
-        <div id="calc-brand" class="flex-sb">
-            <div id="calc-title">KalCueLayTar.com</div>
-            <div id="calc-solarpanel" class="">
-                <div class="panel-grid" class="border-box"></div>
-                <div class="panel-grid" class="border-box"></div>
-                <div class="panel-grid" class="border-box"></div>
-                <div class="panel-grid" class="border-box"></div>
-                <div class="panel-grid" class="border-box"></div>
-            </div>
-        </div>
-        
-        <div id="calc-screen" class="border-box flex-center debug-border">
-            <div class="screen-digit sign" index="10">
-                <div class="placeholder-digit inner">-</div>
-                <div class="digit inner">-</div>
-            </div>
-            <div class="screen-digit actual" index="9">
-                <div class="placeholder-digit inner">8</div>
-                <div class="digit inner">2</div>
-            </div>
-            <div class="screen-digit actual" index="8">
-                <div class="placeholder-digit inner">8</div>
-                <div class="digit inner">3</div>
-            </div>
-            <div class="screen-digit actual" index="7">
-                <div class="placeholder-digit inner">8</div>
-                <div class="digit inner">4</div>
-            </div>
-            <div class="screen-digit actual" index="6">
-                <div class="placeholder-digit inner">8</div>
-                <div class="digit inner">5</div>
-            </div>
-            <div class="screen-digit actual" index="5">
-                <div class="placeholder-digit inner">8</div>
-                <div class="digit inner">6</div>
-            </div>
-            <div class="screen-digit actual" index="4">
-                <div class="placeholder-digit inner">8</div>
-                <div class="digit inner">9</div>
-            </div>
-            <div class="screen-digit actual" index="3">
-                <div class="placeholder-digit inner">8</div>
-                <div class="digit inner">6</div>
-            </div>
-            <div class="screen-digit actual" index="2">
-                <div class="placeholder-digit inner">8</div>
-                <div class="digit inner">5</div>
-            </div>
-            <div class="screen-digit actual" index="1">
-                <div class="placeholder-digit inner">8</div>
-                <div class="digit inner">3</div>
-            </div>
-            <div class="screen-digit actual" index="0">
-                <div class="placeholder-digit inner">8</div>
-                <div class="digit inner">1</div>
-            </div>
-        </div>
-        <div id="calc-pad" class="flex-sb">
-            <div id="calc-num-pad">
-                <div class="num-pad-row">
-                    <button id="7" class="num">7</button>
-                    <button id="8" class="num">8</button>
-                    <button id="9" class="num">9</button>
-                </div>
+    <nav class="border-box web-side-padding text-white">
+        <div id="web-title">CALL-U-LATER.COM</div>
+    </nav>
 
-                <div class="num-pad-row">
-                    <button id="4" class="num">4</button>
-                    <button id="5" class="num">5</button>
-                    <button id="6" class="num">6</button>
-                </div>
-
-                <div class="num-pad-row ">
-                    <button id="1" class="num">1</button>
-                    <button id="2" class="num">2</button>
-                    <button id="3" class="num">3</button>
-                </div>
-
-                <div class="num-pad-row">
-                    <button id="all-clear">AC</button>
-                    <button id="0" class="num">0</button>
-                    <button id="dot">.</button>
+    <div id="main" class="border-box flex-center flex-wrap flex-item-one web-side-padding button-gap">
+        <div id="calculator" class="border-box text-white">
+            <div id="calc-brand" class="flex-sb">
+                <div id="calc-title">CALLULATER</div>
+                <div id="calc-solarpanel" class="">
+                    <div class="panel-grid" class="border-box"></div>
+                    <div class="panel-grid" class="border-box"></div>
+                    <div class="panel-grid" class="border-box"></div>
+                    <div class="panel-grid" class="border-box"></div>
+                    <div class="panel-grid" class="border-box"></div>
                 </div>
             </div>
-            <div id="calc-operator-pad">
-                <div id="calc-operator-top">
-                    <div class="num-pad-row">
+
+            <div id="calc-screen" class="border-box flex-center">
+                <div class="screen-digit sign" index="10">
+                    <div class="placeholder-digit inner">-</div>
+                    <div class="digit inner">-</div>
+                </div>
+                <div class="screen-digit actual" index="9">
+                    <div class="placeholder-digit inner">8</div>
+                    <div class="digit inner">2</div>
+                </div>
+                <div class="screen-digit actual" index="8">
+                    <div class="placeholder-digit inner">8</div>
+                    <div class="digit inner">3</div>
+                </div>
+                <div class="screen-digit actual" index="7">
+                    <div class="placeholder-digit inner">8</div>
+                    <div class="digit inner">4</div>
+                </div>
+                <div class="screen-digit actual" index="6">
+                    <div class="placeholder-digit inner">8</div>
+                    <div class="digit inner">5</div>
+                </div>
+                <div class="screen-digit actual" index="5">
+                    <div class="placeholder-digit inner">8</div>
+                    <div class="digit inner">6</div>
+                </div>
+                <div class="screen-digit actual" index="4">
+                    <div class="placeholder-digit inner">8</div>
+                    <div class="digit inner">9</div>
+                </div>
+                <div class="screen-digit actual" index="3">
+                    <div class="placeholder-digit inner">8</div>
+                    <div class="digit inner">6</div>
+                </div>
+                <div class="screen-digit actual" index="2">
+                    <div class="placeholder-digit inner">8</div>
+                    <div class="digit inner">5</div>
+                </div>
+                <div class="screen-digit actual" index="1">
+                    <div class="placeholder-digit inner">8</div>
+                    <div class="digit inner">3</div>
+                </div>
+                <div class="screen-digit actual" index="0">
+                    <div class="placeholder-digit inner">8</div>
+                    <div class="digit inner">1</div>
+                </div>
+            </div>
+            <div id="calc-pad" class="flex-column button-gap">
+                <div id="calc-top-pad" class="flex-column button-gap">
+                    <div class="pad-row flex-only button-gap">
+                        <button id="7" class="num">7</button>
+                        <button id="8" class="num">8</button>
+                        <button id="9" class="num">9</button>
                         <button id="sign-change">+/-</button>
                         <button id="undo">&#10229;</button>
                     </div>
 
-                    <div class="num-pad-row">
+                    <div class="pad-row flex-only button-gap">
+                        <button id="4" class="num">4</button>
+                        <button id="5" class="num">5</button>
+                        <button id="6" class="num">6</button>
                         <button id="multiply" class="operator" operator="*">&times;</button>
                         <button id="divide" class="operator" operator="/">&divide;</button>
                     </div>
-
                 </div>
-                <div id="calc-operator-bottom" class="flex-center">
-                    <div id="calc-basic-operator" class="flex-one">
-                        <div class="num-pad-row">
+
+                <div id="calc-bottom-pad" class="flex-only button-gap">
+
+                    <div id="calc-bottom-left-pad" class="flex-column button-gap">
+                        <div class="pad-row flex-only button-gap">
+                            <button id="1" class="num">1</button>
+                            <button id="2" class="num">2</button>
+                            <button id="3" class="num">3</button>
                             <button id="plus" class="operator" operator="+">&plus;</button>
                         </div>
 
-                        <div class="num-pad-row">
+                        <div class="pad-row flex-only button-gap">
+                            <button id="all-clear">AC</button>
+                            <button id="0" class="num">0</button>
+                            <button id="dot">.</button>
                             <button id="minus" class="operator" operator="-">&minus;</button>
                         </div>
                     </div>
-                    <div id="calc-equal" class="flex-one">
-                        <div class="num-pad-row">
-                            <button id="equal" operator="=">=</button>
-                        </div>
+
+                    <div id="calc-bottom-right-pad" class="pad-row flex-only">
+                        <button id="equal" operator="=">=</button>
                     </div>
                 </div>
             </div>
         </div>
+        <div id="notes" class="border-box">
+            <div id="keyboard-sc-container">
+                <div id="keyboard-sc-heading">KEYBOARD SHORTCUTS</div>
+                <div id="keyboard-sc-list">
+                    <table>
+                        <tr class="text-white">
+                            <th>Calculator Pad Buttons</td>
+                            <th>Keyboard Shortcuts</td>
+                            <th>Description</td>
+                        </tr>
+                        <tr>
+                            <td><button>0</button> to <button>9</button></td>
+                            <td><button>0</button> to <button>9</button></td>
+                            <td>Numbers</td>
+                        </tr>
+                        <tr>
+                            <td><button>&plus;</button></td>
+                            <td><button>Shift</button> + <button>&plus;
+                                </button></td>
+                            <td>Plus operation</td>
+                        </tr>
+                        <tr>
+                            <td><button>&minus;</button></td>
+                            <td><button>&minus;</button></td>
+                            <td>Minus operation</td>
+                        </tr>
+                        <tr>
+                            <td><button>&times;</button></td>
+                            <td><button>Shift</button> + <button>*</button></td>
+                            <td>Multiply operation</td>
+                        </tr>
+                        <tr>
+                            <td><button>&divide;</button></td>
+                            <td><button>/</button></td>
+                            <td>Divide operation</td>
+                        </tr>
+                        <tr>
+                            <td><button>=</button></td>
+                            <td><button>Enter</button></td>
+                            <td>Perform math operation</td>
+                        </tr>
+                        <tr>
+                            <td><button>.</button></td>
+                            <td><button>.</button></td>
+                            <td>Dot for decimal places</td>
+                        </tr>
+                        <tr>
+                            <td><button>+/-</button></td>
+                            <td><button>s</button></td>
+                            <td>Change sign (positive to negative and vice versa)</td>
+                        </tr>
+                        <tr>
+                            <td><button>&#10229;</button></td>
+                            <td><button>Backspace</button></td>
+                            <td>Undo input / Remove one character</td>
+                        </tr>
+                        <tr>
+                            <td><button>AC</button></td>
+                            <td><button>Esc</button></td>
+                            <td>All clear / Clear memory</td>
+                        </tr>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
     </div>
+
+    <footer class="border-box web-side-padding text-white">
+        The Odin Project - Calculator &#169; 2025
+    </footer>
 </body>
 
 </html>

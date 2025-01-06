@@ -5,7 +5,7 @@
     border: 1px solid black;
 }
 
-/* Change this later */
+/* For debug purpose */
 #debug-display {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 16px;
@@ -14,6 +14,11 @@
 }
 
 /* Utility Class */
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
 .flex-center {
     display: flex;
     justify-content: center;
@@ -23,10 +28,19 @@
 .flex-sb {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: stretch;
 }
 
-.flex-one {
+.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.flex-only {
+    display: flex;
+}
+
+.flex-item-one {
     flex: 1;
 }
 
@@ -39,62 +53,121 @@
 }
 
 .inner {
-    position:absolute;
+    position: absolute;
     top: 0;
     right: 0;
     height: 100%;
     width: 100%;
-    text-align:right;
+    text-align: right;
+}
+
+.web-side-padding {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.text-white {
+    color: rgb(233, 231, 231);
 }
 
 /* Generic element CSS */
 
 body {
+    font-family: "Roboto", sans-serif;
     padding: 0;
     margin: 0;
-    font-family: 'Seven Segment', sans-serif;
+    background-color: rgb(231, 246, 242);
+    /* color: white; */
     height: 100vh;
 }
 
-button {
-    flex: 1;
-    aspect-ratio: 1;
-    font-family: monospace, serif;
+nav,
+footer {
+    background-color: rgb(57, 91, 100);
+    text-align: center;
+
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+}
+
+/* Navigation CSS */
+nav {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    font-size: 40px;
+    font-family: 'Seven Segment', sans-serif;
+    font-weight: 900;
+}
+
+/* Footer CSS */
+footer {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 20px;
 }
 
 /* Main container CSS */
+#main {
+    margin-top: 60px;
+    margin-bottom: 12px;
+}
+
 #calculator {
-    min-width: 300px; 
-    max-width: 600px;
+    width: 450px;
     height: auto;
-    
-    flex: auto;
+    background-color: #2C3333;
+    padding: 12px;
+    border-radius: 10px;
+
+    flex: 0 0 auto;
 }
 
 /* Calculator brand container CSS */
 #calc-brand {
     height: 24px;
+    padding: 12px 0;
+    font-size: 20px;
+    font-weight: 900;
 }
 
 #calc-solarpanel {
     width: 100px;
     height: 100%;
+    border-radius: 5px;
+    background-color: rgb(149, 117, 91);
+    box-shadow: inset 2px 2px 5px 0px rgb(114, 89, 69),
+        inset -2px -2px 5px 0px rgb(114, 89, 69);
+
     display: flex;
 }
 
 .panel-grid {
     height: 100%;
-    border: 1px solid rgb(233, 227, 227);
-    background-color: rgb(37, 30, 26);
+    border-right: 1px solid rgb(131, 104, 80);
 
     flex: 1;
 }
 
+.panel-grid:last-child {
+    border-right: none;
+}
+
 /* Calculator screen container CSS */
 #calc-screen {
-    height: 100px;
+    font-family: 'Seven Segment', sans-serif;
+    height: 53px;
     width: 100%;
-    
+    padding: 4px 8px;
+    margin-bottom: 12px;
+
+    background-color: rgb(145, 155, 110);
+
+    border-radius: 5px;
+    box-shadow: inset 2px 2px 5px 0px rgb(113, 121, 85),
+        inset -2px -2px 5px 0px rgb(113, 121, 85);
 }
 
 .screen-digit {
@@ -102,38 +175,105 @@ button {
 
     position: relative;
     height: 100%;
-    font-size: 90px;
+    font-size: 45px;
     font-weight: bold;
 }
 
 .placeholder-digit {
-    color: rgb(238, 234, 234);
+    color: rgba(88, 88, 88, 0.1);
 }
 
 .digit {
-    color: black;
+    color: rgb(15, 15, 15);
 }
-
-/* To be enabled when body is flex-centered */
-
-/* .actual-digit.sign {
-    right: 4px;
-} */
 
 /* Calculator pad container CSS */
-
-#calc-num-pad {
-    flex: 3;
+.button-gap {
+    gap: 24px;
 }
 
-#calc-operator-pad {
-    flex: 2;
+#calc-bottom-left-pad {
+    flex: 5;
 }
 
-.num-pad-row {
-    display: flex;
+#calc-bottom-right-pad {
+    flex: 1;
 }
 
-button#equal {
-    aspect-ratio: 1/2;
+#calc-pad button {
+    aspect-ratio: 1;
+    font-family: monospace;
+    padding: 0;
+    margin: 0;
+    max-height: 45px;
+    border-radius: 5px;
+    background-color: rgba(41, 41, 41, 255);
+    color: rgb(233, 231, 231);
+    font-weight: 900;
+    font-size: 30px;
+
+    flex: 1;
+}
+
+#calc-pad button#equal {
+    aspect-ratio: initial;
+    max-height: none;
+}
+
+/* Note container CSS */
+#keyboard-sc-heading {
+    color: rgb(44, 51, 51);
+    font-weight: 900;
+    font-size: 24px;
+}
+
+#notes table,
+#notes td,
+#notes th {
+    border: 1px solid rgba(170, 168, 168, 0.3);
+}
+
+#notes table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: rgb(231, 246, 242);
+}
+
+#notes td {
+    text-align: center;
+}
+
+#notes th,
+#notes td {
+    padding: 7px;
+}
+
+#notes tr:first-child {
+    background-color: rgb(57, 91, 100);
+}
+
+#notes tr:nth-child(even) {
+    background-color: rgb(165, 201, 202);
+}
+
+#notes td:first-child button {
+    padding: 3px; 
+    margin: 0;
+    width: 30px;
+    border-radius: 5px;
+    background-color: rgba(41, 41, 41, 255);
+    color: rgb(233, 231, 231);
+    font-weight: 900;
+    font-size: 15px;
+}
+
+#notes td:nth-child(2) button {
+    padding: 3px;
+    margin: 0;
+    min-width: 30px;
+    border-radius: 5px;
+    background-color: rgb(236, 232, 232);
+    color: black;
+    font-weight: 900;
+    font-size: 15px;
 }
