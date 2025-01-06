@@ -465,33 +465,47 @@ function dom_addKeyBoardSupport(calcPad, storageDisplay) {
             });
 
             numPadArray[+keyPressed].dispatchEvent(clickEvent);
+            numPadArray[+keyPressed].classList.add("btn-active");
         } 
         else if (keyPressed === "+") {
             calcPad.querySelector("#plus").dispatchEvent(clickEvent);
+            calcPad.querySelector("#plus").classList.add("btn-active");
         }
         else if (keyPressed === "-") {
             calcPad.querySelector("#minus").dispatchEvent(clickEvent);
+            calcPad.querySelector("#minus").classList.add("btn-active");
         }
         else if (keyPressed === "*") {
             calcPad.querySelector("#multiply").dispatchEvent(clickEvent);
+            calcPad.querySelector("#multiply").classList.add("btn-active");
         }
         else if (keyPressed === "/") {
             calcPad.querySelector("#divide").dispatchEvent(clickEvent);
+            calcPad.querySelector("#divide").classList.add("btn-active");
         }
         else if (keyPressed === "Enter") {
             calcPad.querySelector("#equal").dispatchEvent(clickEvent);
+            calcPad.querySelector("#equal").classList.add("btn-active");
         }
         else if (keyPressed === "Escape") {
             calcPad.querySelector("#all-clear").dispatchEvent(clickEvent);
+            calcPad.querySelector("#all-clear").classList.add("btn-active");
         }
         else if (keyPressed === "Backspace") {
             calcPad.querySelector("#undo").dispatchEvent(clickEvent);
+            calcPad.querySelector("#undo").classList.add("btn-active");
         }
         else if (keyPressed === "s") {
             calcPad.querySelector("#sign-change").dispatchEvent(clickEvent);
+            calcPad.querySelector("#sign-change").classList.add("btn-active");
         }
         else if (keyPressed === ".") {
             calcPad.querySelector("#dot").dispatchEvent(clickEvent);
+            calcPad.querySelector("#dot").classList.add("btn-active");
         }
+    });
+
+    document.addEventListener('keyup', e => {
+        calcPad.querySelectorAll("button").forEach(each => each.classList.remove("btn-active"));
     })
 }

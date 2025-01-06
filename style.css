@@ -74,6 +74,10 @@
     background-color: rgb(189, 15, 15) !important;
 }
 
+.btn-active {
+    border-style: inset;
+}
+
 /* Generic element CSS */
 
 body {
