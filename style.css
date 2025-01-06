@@ -223,6 +223,10 @@ footer {
     flex: 1;
 }
 
+#calc-pad button:hover {
+    cursor: pointer;
+}
+
 #calc-pad button#equal {
     aspect-ratio: initial;
     max-height: none;
