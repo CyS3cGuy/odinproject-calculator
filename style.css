@@ -158,7 +158,7 @@ footer {
 /* Calculator screen container CSS */
 #calc-screen {
     font-family: 'Seven Segment', sans-serif;
-    height: 53px;
+    height: 75px;
     width: 100%;
     padding: 4px 8px;
     margin-bottom: 12px;
@@ -175,7 +175,7 @@ footer {
 
     position: relative;
     height: 100%;
-    font-size: 45px;
+    font-size: 70px;
     font-weight: bold;
 }
 
