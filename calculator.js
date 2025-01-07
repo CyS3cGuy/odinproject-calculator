@@ -146,7 +146,7 @@ function undoNum(buffer) {
 
     let sliced = buffer.slice(0, buffer.length - 1);
 
-    return sliced === "" || sliced === "0" ? "" : sliced;
+    return sliced === "" ? "" : sliced;
 }
 
 // Function to transform number into its exponential string format
@@ -267,33 +267,39 @@ function dom_addNumPadButtonEventListener(calculator, calcPad, calcScreen, stora
     calcPad.querySelectorAll(".num").forEach((eachNumButton) => {
         eachNumButton.addEventListener("click", e => {
             if (!calculator.isError) {
-                let isZero = e.target.getAttribute("id") === "0";
+                let numPadClicked = e.target.getAttribute("id");
+                let isZero = numPadClicked === "0";
                 let isNum1Empty = calculator.num[0] === null;
                 let isNum2Empty = calculator.num[1] === null;
+                let isNum1Single = calculator.numBuffer[0].length === 1;
+                let isNum2Single = calculator.numBuffer[1].length === 1;
+                let isNum1FirstDigitZero = calculator.numBuffer[0][0] === "0";
+                let isNum2FirstDigitZero = calculator.numBuffer[1][0] === "0";
                 let num1LenExceeded = calculator.numBuffer[0].length >= MAX_SCREEN_DIGITS;
                 let num2LenExceeded = calculator.numBuffer[1].length >= MAX_SCREEN_DIGITS;
-                let numPadClicked = e.target.getAttribute("id");
 
+                // Determine if additional digit can be appended to the existing number
+                // criteria to be fulfilled
+                // 1. cannot exceed the screen display length
+                // 2. concurrently cannot be a single digit and first number cannot be "0" 
+                let canAddNum1Digit = !num1LenExceeded && !(isNum1Single && isNum1FirstDigitZero)
+                let canAddNum2Digit = !num2LenExceeded && !(isNum2Single && isNum2FirstDigitZero)
 
                 // Existence of operator means potentially num2 can be filled in instead of num1
                 if (calculator.operator === "") {
 
-                    // But remember to check if the number is empty and yet "0" button is pressed, the "0" should not be accounted for.
-                    if (!(isZero && isNum1Empty)) {
-                        if (!num1LenExceeded) {
-                            calculator.pointer = 0;
-                            calculator.numBuffer[0] = appendNum(calculator.numBuffer[0], numPadClicked);
-                            calculator.num[0] = +calculator.numBuffer[0];
-                        }
+                    // Then we check if the digit can be further appended by checking the existing boolean values
+                    if (canAddNum1Digit) {
+                        calculator.pointer = 0;
+                        calculator.numBuffer[0] = appendNum(calculator.numBuffer[0], numPadClicked);
+                        calculator.num[0] = +calculator.numBuffer[0];
                     }
                 }
                 else {
-                    if (!(isZero && isNum2Empty)) {
-                        if (!num2LenExceeded) {
-                            calculator.pointer = 1;
-                            calculator.numBuffer[1] = appendNum(calculator.numBuffer[1], numPadClicked);
-                            calculator.num[1] = +calculator.numBuffer[1];
-                        }
+                    if (canAddNum2Digit) {
+                        calculator.pointer = 1;
+                        calculator.numBuffer[1] = appendNum(calculator.numBuffer[1], numPadClicked);
+                        calculator.num[1] = +calculator.numBuffer[1];
                     }
                 }
 
@@ -466,7 +472,7 @@ function dom_addKeyBoardSupport(calcPad, storageDisplay) {
 
             numPadArray[+keyPressed].dispatchEvent(clickEvent);
             numPadArray[+keyPressed].classList.add("btn-active");
-        } 
+        }
         else if (keyPressed === "+") {
             calcPad.querySelector("#plus").dispatchEvent(clickEvent);
             calcPad.querySelector("#plus").classList.add("btn-active");
